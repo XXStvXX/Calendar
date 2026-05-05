@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ICS Calendar Generator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      background: #f5f5f5;
+      margin: 0;
+      padding: 40px;
+      color: #111;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: auto;
+      background: white;
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .hint {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0 0 22px;
+    }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .checkbox-row input {
+      width: auto;
+      margin: 0;
+    }
+
+    .checkbox-row label {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button {
+      margin-top: 24px;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #111;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Calendar ICS Generator</h1>
+    <p class="hint">
+      输入项目名称、日期列表和备注，一键生成 .ics 文件。可以导入 Google Calendar、Apple Calendar 或 Outlook。
+    </p>
+
+    <label for="projectName">项目名称</label>
+    <input id="projectName" placeholder="例如：LINB06" value="LINB06" />
+
+    <label for="dates">日期列表</label>
+    <textarea id="dates" placeholder="每行一个日期，或用逗号分隔">2026-05-12,
+2026-05-14,
+2026-05-19,
+2026-05-21,
+2026-05-26,
+2026-05-28,
+2026-06-02,
+2026-06-04,
+2026-06-09,
+2026-06-11</textarea>
+
+    <label for="note">备注</label>
+    <input id="note" placeholder="例如：Problem Set" value="Problem Set" />
+
+    <div class="checkbox-row">
+      <input id="allDay" type="checkbox" onchange="toggleTimeInputs()" />
+      <label for="allDay">全天事件</label>
+    </div>
+
+    <div class="row" id="timeRow">
+      <div>
+        <label for="startTime">开始时间</label>
+        <input id="startTime" type="time" value="09:00" />
+      </div>
+      <div>
+        <label for="endTime">结束时间</label>
+        <input id="endTime" type="time" value="10:00" />
+      </div>
+    </div>
+
+    <label for="location">地点，可选</label>
+    <input id="location" placeholder="例如：UTSC / Library / Online" />
+
+    <button onclick="generateICS()">生成并下载 ICS 文件</button>
+  </div>
+
+  <script>
+    function pad(num) {
+      return String(num).padStart(2, "0");
+    }
+
+    function formatDate(dateStr) {
+      const [year, month, day] = dateStr.split("-").map(Number);
+      return `${year}${pad(month)}${pad(day)}`;
+    }
+
+    function formatDateTime(dateStr, timeStr) {
+      const [year, month, day] = dateStr.split("-").map(Number);
+      const [hour, minute] = timeStr.split(":").map(Number);
+      return `${year}${pad(month)}${pad(day)}T${pad(hour)}${pad(minute)}00`;
+    }
+
+    function getNextDate(dateStr) {
+      const date = new Date(dateStr + "T00:00:00");
+      date.setDate(date.getDate() + 1);
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    function escapeICS(text) {
+      return text
+        .replace(/\\/g, "\\\\")
+        .replace(/,/g, "\\,")
+        .replace(/;/g, "\\;")
+        .replace(/\n/g, "\\n");
+    }
+
+    function cleanDates(rawText) {
+      return rawText
+        .split(/[\n,]+/)
+        .map(d => d.trim())
+        .filter(Boolean)
+        .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d));
+    }
+
+    function generateUID() {
+      return Math.random().toString(36).substring(2) + "@ics-generator";
+    }
+
+    function toggleTimeInputs() {
+      const allDay = document.getElementById("allDay").checked;
+      document.getElementById("timeRow").style.display = allDay ? "none" : "grid";
+    }
+
+    function generateICS() {
+      const projectName = document.getElementById("projectName").value.trim();
+      const datesRaw = document.getElementById("dates").value;
+      const note = document.getElementById("note").value.trim();
+      const startTime = document.getElementById("startTime").value;
+      const endTime = document.getElementById("endTime").value;
+      const location = document.getElementById("location").value.trim();
+      const allDay = document.getElementById("allDay").checked;
+
+      if (!projectName || !datesRaw || !note) {
+        alert("请填写项目名称、日期和备注。");
+        return;
+      }
+
+      if (!allDay && (!startTime || !endTime)) {
+        alert("请填写开始时间和结束时间，或勾选全天事件。");
+        return;
+      }
+
+      const dates = cleanDates(datesRaw);
+
+      if (dates.length === 0) {
+        alert("没有识别到有效日期。格式应为 YYYY-MM-DD，例如 2026-05-12。");
+        return;
+      }
+
+      const now = new Date();
+      const timestamp = now.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+      let ics = "BEGIN:VCALENDAR\r\n";
+      ics += "VERSION:2.0\r\n";
+      ics += "PRODID:-//Simple ICS Generator//EN\r\n";
+      ics += "CALSCALE:GREGORIAN\r\n";
+
+      dates.forEach(date => {
+        const title = `${projectName} - ${note}`;
+
+        ics += "BEGIN:VEVENT\r\n";
+        ics += `UID:${generateUID()}\r\n`;
+        ics += `DTSTAMP:${timestamp}\r\n`;
+
+        if (allDay) {
+          ics += `DTSTART;VALUE=DATE:${formatDate(date)}\r\n`;
+          ics += `DTEND;VALUE=DATE:${formatDate(getNextDate(date))}\r\n`;
+        } else {
+          ics += `DTSTART:${formatDateTime(date, startTime)}\r\n`;
+          ics += `DTEND:${formatDateTime(date, endTime)}\r\n`;
+        }
+
+        ics += `SUMMARY:${escapeICS(title)}\r\n`;
+        ics += `DESCRIPTION:${escapeICS(note)}\r\n`;
+
+        if (location) {
+          ics += `LOCATION:${escapeICS(location)}\r\n`;
+        }
+
+        ics += "END:VEVENT\r\n";
+      });
+
+      ics += "END:VCALENDAR\r\n";
+
+      const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${projectName}_${note}.ics`.replace(/\s+/g, "_");
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
