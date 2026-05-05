@@ -18,7 +18,7 @@
     }
 
     .container {
-      max-width: 820px;
+      max-width: 860px;
       margin: auto;
       background: white;
       padding: 28px;
@@ -47,7 +47,8 @@
     }
 
     input,
-    select {
+    select,
+    textarea {
       width: 100%;
       padding: 12px;
       margin-top: 8px;
@@ -55,6 +56,12 @@
       border-radius: 8px;
       font-size: 15px;
       background: #fff;
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.5;
     }
 
     .row {
@@ -80,6 +87,39 @@
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
+    }
+
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .mode-button {
+      padding: 13px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: #fff;
+      color: #111;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mode-button.active {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+
+    .mode-panel {
+      display: none;
+      margin-top: 18px;
+    }
+
+    .mode-panel.active {
+      display: block;
     }
 
     .month-block {
@@ -174,7 +214,7 @@
   <div class="container">
     <h1>Calendar ICS Generator</h1>
     <p class="hint">
-      输入项目名称和备注，然后按月份多选日期，一键生成 .ics 文件。可以导入 Google Calendar、Apple Calendar 或 Outlook。
+      选择一种日期输入模式：粘贴日期文本，或者按月份手动多选日期。两个模式互斥，生成时只会读取当前模式。
     </p>
 
     <label for="projectName">项目名称</label>
@@ -202,14 +242,36 @@
     <label for="location">地点，可选</label>
     <input id="location" placeholder="例如：UTSC / Library / Online" />
 
-    <div class="section-title">选择日期</div>
-    <div id="monthContainer"></div>
+    <div class="section-title">日期输入模式</div>
+    <div class="mode-tabs">
+      <button type="button" id="pasteModeButton" class="mode-button active" onclick="setMode('paste')">粘贴日期文本</button>
+      <button type="button" id="selectModeButton" class="mode-button" onclick="setMode('select')">按月份选择日期</button>
+    </div>
 
-    <button class="small-button" onclick="addMonthBlock()">添加月份</button>
+    <div id="pastePanel" class="mode-panel active">
+      <label for="datesText">日期列表</label>
+      <textarea id="datesText" placeholder="每行一个日期，或用逗号分隔">2026-05-12,
+2026-05-14,
+2026-05-19,
+2026-05-21,
+2026-05-26,
+2026-05-28,
+2026-06-02,
+2026-06-04,
+2026-06-09,
+2026-06-11</textarea>
+    </div>
+
+    <div id="selectPanel" class="mode-panel">
+      <div id="monthContainer"></div>
+      <button type="button" class="small-button" onclick="addMonthBlock()">添加月份</button>
+    </div>
+
     <button class="main-button" onclick="generateICS()">生成并下载 ICS 文件</button>
   </div>
 
   <script>
+    let currentMode = "paste";
     let monthBlockId = 0;
     const monthNames = [
       "一月", "二月", "三月", "四月", "五月", "六月",
@@ -258,6 +320,24 @@
       document.getElementById("timeRow").style.display = allDay ? "none" : "grid";
     }
 
+    function setMode(mode) {
+      currentMode = mode;
+
+      document.getElementById("pasteModeButton").classList.toggle("active", mode === "paste");
+      document.getElementById("selectModeButton").classList.toggle("active", mode === "select");
+
+      document.getElementById("pastePanel").classList.toggle("active", mode === "paste");
+      document.getElementById("selectPanel").classList.toggle("active", mode === "select");
+    }
+
+    function cleanDates(rawText) {
+      return rawText
+        .split(/[\n,]+/)
+        .map(d => d.trim())
+        .filter(Boolean)
+        .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d));
+    }
+
     function createMonthOptions(selectedMonth) {
       return monthNames.map((name, index) => {
         const value = index + 1;
@@ -286,7 +366,7 @@
               ${createMonthOptions(defaultMonth)}
             </select>
           </div>
-          <button class="small-button remove-button" onclick="removeMonthBlock(${id})">删除</button>
+          <button type="button" class="small-button remove-button" onclick="removeMonthBlock(${id})">删除</button>
         </div>
         <div class="days-grid" id="days-${id}"></div>
       `;
@@ -329,6 +409,18 @@
         .sort();
     }
 
+    function getDatesByCurrentMode() {
+      if (currentMode === "paste") {
+        return cleanDates(document.getElementById("datesText").value);
+      }
+
+      if (currentMode === "select") {
+        return getSelectedDates();
+      }
+
+      return [];
+    }
+
     function generateICS() {
       const projectName = document.getElementById("projectName").value.trim();
       const note = document.getElementById("note").value.trim();
@@ -336,7 +428,7 @@
       const endTime = document.getElementById("endTime").value;
       const location = document.getElementById("location").value.trim();
       const allDay = document.getElementById("allDay").checked;
-      const dates = getSelectedDates();
+      const dates = [...new Set(getDatesByCurrentMode())].sort();
 
       if (!projectName || !note) {
         alert("请填写项目名称和备注。");
@@ -344,7 +436,7 @@
       }
 
       if (dates.length === 0) {
-        alert("请至少选择一个日期。");
+        alert("当前模式下没有有效日期。粘贴模式请使用 YYYY-MM-DD；选择模式请至少点选一个日期。");
         return;
       }
 
@@ -404,4 +496,3 @@
   </script>
 </body>
 </html>
-
