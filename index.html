@@ -18,7 +18,7 @@
     }
 
     .container {
-      max-width: 760px;
+      max-width: 820px;
       margin: auto;
       background: white;
       padding: 28px;
@@ -47,7 +47,7 @@
     }
 
     input,
-    textarea {
+    select {
       width: 100%;
       padding: 12px;
       margin-top: 8px;
@@ -55,12 +55,6 @@
       border-radius: 8px;
       font-size: 15px;
       background: #fff;
-    }
-
-    textarea {
-      min-height: 130px;
-      resize: vertical;
-      line-height: 1.5;
     }
 
     .row {
@@ -88,7 +82,66 @@
       cursor: pointer;
     }
 
-    button {
+    .month-block {
+      margin-top: 20px;
+      padding: 18px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      background: #fafafa;
+    }
+
+    .month-header {
+      display: flex;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .month-header > div {
+      flex: 1;
+    }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .day-button {
+      padding: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: white;
+      color: #111;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .day-button.selected {
+      background: #111;
+      color: white;
+      border-color: #111;
+    }
+
+    .small-button {
+      width: auto;
+      padding: 11px 14px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 8px;
+      background: #eee;
+      color: #111;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .small-button:hover {
+      background: #ddd;
+    }
+
+    .main-button {
       margin-top: 24px;
       width: 100%;
       padding: 14px;
@@ -101,8 +154,19 @@
       cursor: pointer;
     }
 
-    button:hover {
+    .main-button:hover {
       background: #333;
+    }
+
+    .remove-button {
+      background: #f1f1f1;
+      color: #333;
+    }
+
+    .section-title {
+      margin-top: 26px;
+      font-size: 18px;
+      font-weight: 700;
     }
   </style>
 </head>
@@ -110,23 +174,11 @@
   <div class="container">
     <h1>Calendar ICS Generator</h1>
     <p class="hint">
-      输入项目名称、日期列表和备注，一键生成 .ics 文件。可以导入 Google Calendar、Apple Calendar 或 Outlook。
+      输入项目名称和备注，然后按月份多选日期，一键生成 .ics 文件。可以导入 Google Calendar、Apple Calendar 或 Outlook。
     </p>
 
     <label for="projectName">项目名称</label>
     <input id="projectName" placeholder="例如：LINB06" value="LINB06" />
-
-    <label for="dates">日期列表</label>
-    <textarea id="dates" placeholder="每行一个日期，或用逗号分隔">2026-05-12,
-2026-05-14,
-2026-05-19,
-2026-05-21,
-2026-05-26,
-2026-05-28,
-2026-06-02,
-2026-06-04,
-2026-06-09,
-2026-06-11</textarea>
 
     <label for="note">备注</label>
     <input id="note" placeholder="例如：Problem Set" value="Problem Set" />
@@ -150,12 +202,26 @@
     <label for="location">地点，可选</label>
     <input id="location" placeholder="例如：UTSC / Library / Online" />
 
-    <button onclick="generateICS()">生成并下载 ICS 文件</button>
+    <div class="section-title">选择日期</div>
+    <div id="monthContainer"></div>
+
+    <button class="small-button" onclick="addMonthBlock()">添加月份</button>
+    <button class="main-button" onclick="generateICS()">生成并下载 ICS 文件</button>
   </div>
 
   <script>
+    let monthBlockId = 0;
+    const monthNames = [
+      "一月", "二月", "三月", "四月", "五月", "六月",
+      "七月", "八月", "九月", "十月", "十一月", "十二月"
+    ];
+
     function pad(num) {
       return String(num).padStart(2, "0");
+    }
+
+    function daysInMonth(year, month) {
+      return new Date(year, month, 0).getDate();
     }
 
     function formatDate(dateStr) {
@@ -183,14 +249,6 @@
         .replace(/\n/g, "\\n");
     }
 
-    function cleanDates(rawText) {
-      return rawText
-        .split(/[\n,]+/)
-        .map(d => d.trim())
-        .filter(Boolean)
-        .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d));
-    }
-
     function generateUID() {
       return Math.random().toString(36).substring(2) + "@ics-generator";
     }
@@ -200,29 +258,98 @@
       document.getElementById("timeRow").style.display = allDay ? "none" : "grid";
     }
 
+    function createMonthOptions(selectedMonth) {
+      return monthNames.map((name, index) => {
+        const value = index + 1;
+        const selected = value === selectedMonth ? "selected" : "";
+        return `<option value="${value}" ${selected}>${name}</option>`;
+      }).join("");
+    }
+
+    function addMonthBlock(defaultYear = 2026, defaultMonth = 5) {
+      monthBlockId++;
+      const id = monthBlockId;
+      const container = document.getElementById("monthContainer");
+
+      const block = document.createElement("div");
+      block.className = "month-block";
+      block.dataset.blockId = id;
+      block.innerHTML = `
+        <div class="month-header">
+          <div>
+            <label for="year-${id}">年份</label>
+            <input id="year-${id}" type="number" value="${defaultYear}" onchange="renderDays(${id})" />
+          </div>
+          <div>
+            <label for="month-${id}">月份</label>
+            <select id="month-${id}" onchange="renderDays(${id})">
+              ${createMonthOptions(defaultMonth)}
+            </select>
+          </div>
+          <button class="small-button remove-button" onclick="removeMonthBlock(${id})">删除</button>
+        </div>
+        <div class="days-grid" id="days-${id}"></div>
+      `;
+
+      container.appendChild(block);
+      renderDays(id);
+    }
+
+    function removeMonthBlock(id) {
+      const block = document.querySelector(`[data-block-id="${id}"]`);
+      if (block) {
+        block.remove();
+      }
+    }
+
+    function renderDays(id) {
+      const year = Number(document.getElementById(`year-${id}`).value);
+      const month = Number(document.getElementById(`month-${id}`).value);
+      const grid = document.getElementById(`days-${id}`);
+      const totalDays = daysInMonth(year, month);
+
+      grid.innerHTML = "";
+
+      for (let day = 1; day <= totalDays; day++) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "day-button";
+        button.textContent = day;
+        button.dataset.date = `${year}-${pad(month)}-${pad(day)}`;
+        button.onclick = function () {
+          button.classList.toggle("selected");
+        };
+        grid.appendChild(button);
+      }
+    }
+
+    function getSelectedDates() {
+      return Array.from(document.querySelectorAll(".day-button.selected"))
+        .map(button => button.dataset.date)
+        .sort();
+    }
+
     function generateICS() {
       const projectName = document.getElementById("projectName").value.trim();
-      const datesRaw = document.getElementById("dates").value;
       const note = document.getElementById("note").value.trim();
       const startTime = document.getElementById("startTime").value;
       const endTime = document.getElementById("endTime").value;
       const location = document.getElementById("location").value.trim();
       const allDay = document.getElementById("allDay").checked;
+      const dates = getSelectedDates();
 
-      if (!projectName || !datesRaw || !note) {
-        alert("请填写项目名称、日期和备注。");
+      if (!projectName || !note) {
+        alert("请填写项目名称和备注。");
+        return;
+      }
+
+      if (dates.length === 0) {
+        alert("请至少选择一个日期。");
         return;
       }
 
       if (!allDay && (!startTime || !endTime)) {
         alert("请填写开始时间和结束时间，或勾选全天事件。");
-        return;
-      }
-
-      const dates = cleanDates(datesRaw);
-
-      if (dates.length === 0) {
-        alert("没有识别到有效日期。格式应为 YYYY-MM-DD，例如 2026-05-12。");
         return;
       }
 
@@ -271,6 +398,10 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
+
+    addMonthBlock(2026, 5);
+    addMonthBlock(2026, 6);
   </script>
 </body>
 </html>
+
