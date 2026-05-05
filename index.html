@@ -3,1288 +3,153 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ICS Calendar Generator</title>
-  <title>UTSC Course Calendar ICS Generator</title>
+  <title>UTSC Summer Course Calendar ICS Generator</title>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    body {
-      background: #f5f5f5;
-      margin: 0;
-      padding: 40px;
-      color: #111;
-    }
-
-    .container {
-      max-width: 940px;
-      max-width: 1040px;
-      margin: auto;
-      background: #fff;
-      padding: 28px;
-      border-radius: 14px;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-    }
-
-    h1 {
-      margin: 0 0 10px;
-      font-size: 28px;
-      font-weight: 700;
-      font-size: 30px;
-      font-weight: 800;
-    }
-
-    h2 {
-      margin: 0 0 14px;
-      font-size: 22px;
-    }
-
-    .hint {
-      color: #666;
-      font-size: 14px;
-      line-height: 1.6;
-      margin: 0 0 22px;
-    }
-
-    .academic-card,
-    .form-section,
-    .calendar-status {
-      margin-top: 22px;
-      padding: 18px;
-      border: 1px solid #ddd;
-      border-radius: 14px;
-      background: #fafafa;
-    }
-
-    .academic-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .academic-item {
-      padding: 12px;
-      border: 1px solid #e1e1e1;
-      border-radius: 10px;
-      background: #fff;
-      line-height: 1.45;
-    }
-
-    .academic-code {
-      display: inline-block;
-      margin-right: 6px;
-      padding: 2px 7px;
-      border-radius: 999px;
-      background: #111;
-      color: #fff;
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    label {
-      display: block;
-      margin-top: 18px;
-      margin-top: 16px;
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 15px;
-      background: #fff;
-    }
-
-    textarea {
-      min-height: 130px;
-      min-height: 110px;
-      resize: vertical;
-      line-height: 1.5;
-    }
-
-    .row {
-    .row,
-    .three-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .row {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .three-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    .checkbox-row {
-    .checkbox-row,
-    .weekday-picker {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-      margin-top: 18px;
-      margin-top: 12px;
-    }
-
-    .checkbox-row input {
-    .checkbox-row input,
-    .weekday-picker input {
-      width: auto;
-      margin: 0;
-    }
-
-    .checkbox-row label {
-    .checkbox-row label,
-    .weekday-picker label {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      margin: 0;
-      font-size: 15px;
-      font-weight: 700;
-      padding: 9px 11px;
-      border: 1px solid #ddd;
-      border-radius: 999px;
-      background: #fff;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    .mode-tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 22px;
-      margin-top: 14px;
-    }
-
-    .mode-button {
-      padding: 13px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      background: #fff;
-      color: #111;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .mode-button.active {
-      background: #111;
-      color: #fff;
-      border-color: #111;
-    }
-
-    .mode-panel {
-      display: none;
-      margin-top: 18px;
-      margin-top: 14px;
-    }
-
-    .mode-panel.active {
-      display: block;
-    }
-
-    .format-box {
-      margin-top: 18px;
-      padding: 16px;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      background: #fafafa;
-    }
-
-    .format-title {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .format-note {
-      font-size: 13px;
-      color: #666;
-      line-height: 1.5;
-      margin: 0;
-    }
-
-    .month-block {
-      margin-top: 20px;
-      padding: 18px;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      background: #fafafa;
-    }
-
-    .month-header {
-      display: flex;
-      gap: 12px;
-      align-items: end;
-    }
-
-    .month-header > div {
-      flex: 1;
-    }
-
-    .calendar-grid {
-    .button-row {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-      margin-top: 14px;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .weekday-button,
-    .day-button,
-    .blank-day {
-      min-height: 42px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 700;
-    button {
-      font-family: inherit;
-    }
-
-    .weekday-button {
-      border: 1px solid #bbb;
-      background: #eee;
-      color: #111;
-    .main-button,
-    .secondary-button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .weekday-button:hover {
-      background: #ddd;
-    }
-
-    .weekday-button.active {
-    .main-button {
-      border: none;
-      background: #111;
-      color: #fff;
-      border-color: #111;
-    }
-
-    .day-button {
-      border: 1px solid #ccc;
-      background: #fff;
-      color: #111;
-      cursor: pointer;
-    .main-button:hover {
-      background: #333;
-    }
-
-    .day-button.selected {
-      background: #111;
-      color: #fff;
-      border-color: #111;
-    .secondary-button {
-      border: 1px solid #111;
-      background: #fff;
-      color: #111;
-    }
-
-    .blank-day {
-      border: 1px dashed #e0e0e0;
-      background: #f7f7f7;
-    .secondary-button:hover {
-      background: #f1f1f1;
-    }
-
-    .small-button {
-    .danger-button {
-      margin-top: 10px;
-      width: auto;
-      padding: 11px 14px;
-      margin-top: 8px;
-      padding: 10px 12px;
-      border: none;
-      border-radius: 8px;
-      background: #eee;
-      color: #111;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .small-button:hover {
-      background: #ddd;
-    }
-
-    .main-button {
-      margin-top: 24px;
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 10px;
-      background: #111;
-      color: #fff;
-      font-size: 16px;
-      color: #333;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .main-button:hover {
-      background: #333;
-    }
-
-    .remove-button {
-      background: #f1f1f1;
-      color: #333;
-    .calendar-status ul {
-      padding-left: 20px;
-      margin: 10px 0 0;
-      line-height: 1.6;
-    }
-
-    .section-title {
-      margin-top: 26px;
-      font-size: 18px;
-      font-weight: 700;
-    .empty-state {
-      color: #666;
-      margin: 8px 0 0;
-    }
-
-    @media (max-width: 700px) {
-    @media (max-width: 760px) {
-      body {
-        padding: 20px;
-        padding: 18px;
-      }
-
-      .academic-grid,
-      .row,
-      .three-col,
-      .mode-tabs {
-      .mode-tabs,
-      .button-row {
-        grid-template-columns: 1fr;
-      }
-
-      .month-header {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .calendar-grid {
-        gap: 5px;
-      }
-
-      .weekday-button,
-      .day-button,
-      .blank-day {
-        min-height: 36px;
-        font-size: 12px;
-      }
-    }
+    *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}body{background:#f4f4f5;margin:0;padding:34px;color:#111}.container{max-width:1050px;margin:auto;background:#fff;padding:28px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.08)}h1{margin:0 0 8px;font-size:30px}.hint{color:#555;line-height:1.55;margin:0 0 20px}.card{border:1px solid #ddd;background:#fafafa;border-radius:14px;padding:18px;margin-top:18px}.card h2{font-size:19px;margin:0 0 12px}.academic-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.date-chip{background:white;border:1px solid #ddd;border-radius:12px;padding:12px}.date-chip b{display:block;margin-bottom:5px}label{display:block;margin-top:15px;font-weight:700;font-size:14px}input,select,textarea{width:100%;padding:11px;margin-top:7px;border:1px solid #cfcfcf;border-radius:9px;font-size:15px;background:white}textarea{min-height:105px;resize:vertical;line-height:1.5}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.four{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}.checkbox-row{display:flex;align-items:center;gap:9px;margin-top:15px}.checkbox-row input{width:auto;margin:0}.checkbox-row label{margin:0;cursor:pointer}.session-buttons,.weekday-grid,.mode-tabs{display:grid;gap:8px}.session-buttons{grid-template-columns:repeat(3,1fr);margin-top:8px}.weekday-grid{grid-template-columns:repeat(7,1fr);margin-top:10px}.mode-tabs{grid-template-columns:1fr 1fr;margin-top:10px}.pill,.tab,.weekday{padding:11px;border:1px solid #bbb;border-radius:10px;background:white;font-weight:700;cursor:pointer}.pill.active,.tab.active,.weekday.active{background:#111;color:white;border-color:#111}.tab-panel{display:none}.tab-panel.active{display:block}.btn{width:100%;padding:14px;border:0;border-radius:11px;background:#111;color:#fff;font-weight:800;font-size:15px;cursor:pointer;margin-top:18px}.btn.secondary{background:#eee;color:#111}.btn.danger{background:#ffe8e8;color:#8a1111}.btn.inline{width:auto;padding:10px 13px;margin-top:8px}.event-list{margin-top:12px}.event-item{background:white;border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:10px}.muted{color:#666;font-size:13px}.warning{background:#fff7d6;border:1px solid #ead484;border-radius:12px;padding:12px;margin-top:12px}.hidden{display:none}@media(max-width:800px){body{padding:16px}.academic-grid,.row,.three,.four,.session-buttons,.mode-tabs{grid-template-columns:1fr}.weekday-grid{grid-template-columns:repeat(2,1fr)}}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Calendar ICS Generator</h1>
-    <h1>UTSC Course Calendar ICS Generator</h1>
-    <p class="hint">
-      选择一种日期输入模式：粘贴日期文本，或者按月份手动多选日期。两个模式互斥，生成时只会读取当前模式。
-      先建立一个课程日历，再把 Project / Assignment / Exam 等不同项目逐个添加进去。最后下载的 ICS 只包含同一个课程代码的事件。
-    </p>
+<div class="container">
+  <h1>UTSC Summer Course Calendar ICS Generator</h1>
+  <p class="hint">先锁定一个课程代码，再添加多个项目。最后导出的 ICS 只包含这个课程，避免不同课程混在一起。</p>
 
-    <label for="projectName">项目名称</label>
-    <input id="projectName" placeholder="例如：LINB06" value="LINB06" />
-    <section class="academic-card" aria-labelledby="academicDatesTitle">
-      <h2 id="academicDatesTitle">Academic Date · Summer 2026</h2>
-      <p class="hint">以下日期来自你提供的 UTSC Summer 2026 academic dates，缩写会在后续表单中使用。</p>
-      <div class="academic-grid" id="academicDatesGrid"></div>
-    </section>
-
-    <section class="form-section" aria-labelledby="courseInfoTitle">
-      <h2 id="courseInfoTitle">1. 信息准备</h2>
-      <div class="row">
-        <div>
-          <label for="courseName">课程名称</label>
-          <input id="courseName" placeholder="例如：Research Seminar" />
-        </div>
-        <div>
-          <label for="courseCode">课程代码</label>
-          <input id="courseCode" placeholder="例如：ECTD66" />
-        </div>
-      </div>
-
-      <label for="courseSession">课程学期</label>
-      <select id="courseSession" onchange="syncSessionHelp()">
-        <option value="fss">first sub-session (fss)</option>
-        <option value="sss">second sub-session (sss)</option>
-        <option value="fs" selected>full session (fs)</option>
-      </select>
-      <p class="hint" id="sessionHelp"></p>
-
-      <div class="row">
-        <div>
-          <label for="assessmentName">项目名称</label>
-          <input id="assessmentName" placeholder="例如：project 1 / Sessions 3–10 Assignments" />
-        </div>
-        <div>
-          <label for="weight">分数占比</label>
-          <input id="weight" placeholder="例如：5% / Each assignment = 2.5%" />
-        </div>
-      </div>
-
-    <label for="note">备注</label>
-    <input id="note" placeholder="例如：Problem Set" value="Problem Set" />
-      <label for="note">备注</label>
-      <textarea id="note" placeholder="可以写任何希望放进日历备注里的内容，例如 Details provided in Quercus."></textarea>
-
-    <div class="checkbox-row">
-      <input id="allDay" type="checkbox" onchange="toggleTimeInputs()" />
-      <label for="allDay">全天事件</label>
-    </div>
-      <div class="row">
-        <div>
-          <label for="location">教室号 / 地点</label>
-          <input id="location" placeholder="例如：KW170 / Online" />
-        </div>
-        <div>
-          <label for="link">链接</label>
-          <input id="link" type="url" placeholder="例如：https://q.utoronto.ca/..." />
-        </div>
-      </div>
-    </section>
-
-    <div class="row" id="timeRow">
-      <div>
-        <label for="startTime">开始时间</label>
-        <input id="startTime" type="time" value="09:00" />
-    <section class="form-section" aria-labelledby="eventInfoTitle">
-      <h2 id="eventInfoTitle">2. 日历信息输入</h2>
-      <div class="checkbox-row">
-        <input id="allDay" type="checkbox" onchange="toggleTimeInputs()" />
-        <label for="allDay">全天事件</label>
-      </div>
-      <div>
-        <label for="endTime">结束时间</label>
-        <input id="endTime" type="time" value="10:00" />
-
-      <div class="row" id="timeRow">
-        <div>
-          <label for="startTime">开始时间</label>
-          <input id="startTime" type="time" value="09:00" />
-        </div>
-        <div>
-          <label for="endTime">结束时间</label>
-          <input id="endTime" type="time" value="10:00" />
-        </div>
-      </div>
-
-      <label>事件日期</label>
-      <div class="mode-tabs">
-        <button type="button" id="pasteModeButton" class="mode-button active" onclick="setMode('paste')">粘贴日期</button>
-        <button type="button" id="recurringModeButton" class="mode-button" onclick="setMode('recurring')">按学期内星期几重复</button>
-      </div>
-    </div>
-
-    <label for="location">地点，可选</label>
-    <input id="location" placeholder="例如：UTSC / Library / Online" />
-
-    <div class="section-title">日期输入模式</div>
-    <div class="mode-tabs">
-      <button type="button" id="pasteModeButton" class="mode-button active" onclick="setMode('paste')">粘贴日期文本</button>
-      <button type="button" id="selectModeButton" class="mode-button" onclick="setMode('select')">按月份选择日期</button>
-    </div>
-
-    <div id="pastePanel" class="mode-panel active">
-      <div class="format-box">
-        <div class="format-title">粘贴日期顺序</div>
-        <p class="format-note">
-          请选择你粘贴日期的真实顺序。支持数字月份，也支持英文月份，例如 March、Mar、April、Apr。分隔符可以是 - / _ . 空格 或逗号。
-
-      <div id="pastePanel" class="mode-panel active">
-        <p class="hint">
-          支持 2026-05-14、2026/05/14、20260514、May 14 2026、14 May 2026。日期可以换行、逗号分隔，也可以整串黏贴如 2026-05-142026-05-21。
-        </p>
-        <div class="three-col">
-          <div>
-            <label for="part1">第 1 位</label>
-            <select id="part1" onchange="validateDateOrder()">
-              <option value="year" selected>Year</option>
-              <option value="month">Month</option>
-              <option value="day">Day</option>
-            </select>
-          </div>
-          <div>
-            <label for="part2">第 2 位</label>
-            <select id="part2" onchange="validateDateOrder()">
-              <option value="year">Year</option>
-              <option value="month" selected>Month</option>
-              <option value="day">Day</option>
-            </select>
-          </div>
-          <div>
-            <label for="part3">第 3 位</label>
-            <select id="part3" onchange="validateDateOrder()">
-              <option value="year">Year</option>
-              <option value="month">Month</option>
-              <option value="day" selected>Day</option>
-            </select>
-          </div>
-        </div>
-        <label for="datesText">日期粘贴框</label>
-        <textarea id="datesText" placeholder="例如：2026-05-14, 2026-05-21, 2026-05-28"></textarea>
-      </div>
-
-      <div id="recurringPanel" class="mode-panel">
-        <p class="hint" id="recurringHelp"></p>
-        <div class="weekday-picker" id="weekdayPicker"></div>
-      </div>
-
-      <label for="datesText">日期列表</label>
-      <textarea id="datesText" placeholder="例如：2026-05-12 或 12 Mar 2026 或 March 12 2026">2026-05-12,
-2026-05-14,
-2026-05-19,
-2026-05-21,
-2026-05-26,
-2026-05-28,
-2026-06-02,
-2026-06-04,
-2026-06-09,
-2026-06-11</textarea>
-    </div>
-
-    <div id="selectPanel" class="mode-panel">
-      <div id="monthContainer"></div>
-      <button type="button" class="small-button" onclick="addMonthBlock()">添加月份</button>
-    </div>
-
-    <button class="main-button" onclick="generateICS()">生成并下载 ICS 文件</button>
-      <div class="button-row">
-        <button type="button" class="secondary-button" onclick="addCurrentAssessment()">添加到课程日历</button>
-        <button type="button" class="main-button" onclick="downloadCourseCalendar()">完成课程日历并下载 ICS</button>
-      </div>
-    </section>
-
-    <section class="calendar-status" aria-labelledby="calendarStatusTitle">
-      <h2 id="calendarStatusTitle">当前课程日历</h2>
-      <div id="calendarSummary" class="empty-state">还没有添加任何项目。</div>
-      <button type="button" class="danger-button" onclick="clearCourseCalendar()">清空当前课程日历</button>
-    </section>
+  <div class="card">
+    <h2>Academic Dates · Summer 2026</h2>
+    <div class="academic-grid" id="academicDates"></div>
+    <p class="muted">缩写：fss = first sub-session；sss = second sub-session；fs = full session；rw = reading week；fp = final period。</p>
   </div>
 
-  <script>
-    let currentMode = "paste";
-    let monthBlockId = 0;
-
-    const selectedDates = new Set();
-    const manualDates = new Set();
-    const weekdayRules = new Map();
-    const academicDates = {
-      fss: { code: "fss", label: "First sub-session", start: "2026-05-04", end: "2026-06-16" },
-      sss: { code: "sss", label: "Second sub-session", start: "2026-06-22", end: "2026-08-06" },
-      fs: { code: "fs", label: "Full session", start: "2026-05-04", end: "2026-08-06" },
-      rw: { code: "rw", label: "Reading week", start: "2026-06-17", end: "2026-06-20" },
-      fss_fp: { code: "fss_fp", label: "FSS final period", start: "2026-06-17", end: "2026-06-20" },
-      sss_fp: { code: "sss_fp", label: "SSS final period", start: "2026-08-10", end: "2026-08-22" },
-      fs_fp: { code: "fs_fp", label: "FS final period", start: "2026-08-10", end: "2026-08-22" }
-    };
-
-    const monthNames = [
-      "一月", "二月", "三月", "四月", "五月", "六月",
-      "七月", "八月", "九月", "十月", "十一月", "十二月"
-    const weekdayNames = [
-      { value: 0, label: "周日" },
-      { value: 1, label: "周一" },
-      { value: 2, label: "周二" },
-      { value: 3, label: "周三" },
-      { value: 4, label: "周四" },
-      { value: 5, label: "周五" },
-      { value: 6, label: "周六" }
-    ];
-
-    const weekdayNames = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-
-    const monthMap = {
-      jan: 1, january: 1,
-      feb: 2, february: 2,
-      mar: 3, march: 3,
-      apr: 4, april: 4,
-      may: 5,
-      jun: 6, june: 6,
-      jul: 7, july: 7,
-      aug: 8, august: 8,
-      sep: 9, sept: 9, september: 9,
-      oct: 10, october: 10,
-      nov: 11, november: 11,
-      dec: 12, december: 12
-    };
-
-    let currentMode = "paste";
-    let courseCalendar = {
-      courseCode: "",
-      courseName: "",
-      session: "",
-      events: []
-    };
-
-    function pad(num) {
-      return String(num).padStart(2, "0");
-    }
-
-    function makeDate(year, month, day) {
-      return `${year}-${pad(month)}-${pad(day)}`;
-    }
-
-    function formatReadableDate(dateStr) {
-      const date = new Date(dateStr + "T00:00:00");
-      return date.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
-    }
-
-    function formatDateRange(start, end) {
-      return `${formatReadableDate(start)} – ${formatReadableDate(end)}`;
-    }
-
-    function daysInMonth(year, month) {
-      return new Date(year, month, 0).getDate();
-    }
-
-    function isValidDateParts(year, month, day) {
-      return Number.isInteger(year) &&
-        Number.isInteger(month) &&
-        Number.isInteger(day) &&
-        year >= 1900 &&
-        year <= 2100 &&
-        month >= 1 &&
-        month <= 12 &&
-        day >= 1 &&
-        day <= daysInMonth(year, month);
-    }
-
-    function formatDate(dateStr) {
-    function isWithinRange(dateStr, start, end) {
-      return dateStr >= start && dateStr <= end;
-    }
-
-    function formatICSDate(dateStr) {
-      const [year, month, day] = dateStr.split("-").map(Number);
-      return `${year}${pad(month)}${pad(day)}`;
-    }
-
-    function formatDateTime(dateStr, timeStr) {
-    function formatICSDateTime(dateStr, timeStr) {
-      const [year, month, day] = dateStr.split("-").map(Number);
-      const [hour, minute] = timeStr.split(":").map(Number);
-      return `${year}${pad(month)}${pad(day)}T${pad(hour)}${pad(minute)}00`;
-    }
-
-    function getNextDate(dateStr) {
-      const date = new Date(dateStr + "T00:00:00");
-      date.setDate(date.getDate() + 1);
-      return makeDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
-    }
-
-    function escapeICS(text) {
-      return text
-      return String(text || "")
-        .replace(/\\/g, "\\\\")
-        .replace(/,/g, "\\,")
-        .replace(/;/g, "\\;")
-        .replace(/\n/g, "\\n");
-    }
-
-    function generateUID() {
-      return Math.random().toString(36).substring(2) + "@ics-generator";
-      return `${Date.now()}-${Math.random().toString(36).slice(2)}@utsc-course-ics-generator`;
-    }
-
-    function renderAcademicDates() {
-      const grid = document.getElementById("academicDatesGrid");
-      grid.innerHTML = Object.values(academicDates).map(item => `
-        <div class="academic-item">
-          <span class="academic-code">${item.code}</span>
-          <strong>${item.label}</strong><br />
-          ${formatDateRange(item.start, item.end)}
-        </div>
-      `).join("");
-    }
-
-    function renderWeekdayPicker() {
-      const picker = document.getElementById("weekdayPicker");
-      picker.innerHTML = weekdayNames.map(day => `
-        <label>
-          <input type="checkbox" name="weekday" value="${day.value}" />
-          ${day.label}
-        </label>
-      `).join("");
-    }
-
-    function syncSessionHelp() {
-      const sessionKey = document.getElementById("courseSession").value;
-      const session = academicDates[sessionKey];
-      document.getElementById("sessionHelp").textContent = `${session.label}: ${formatDateRange(session.start, session.end)}`;
-      document.getElementById("recurringHelp").textContent = `重复日期会自动限定在 ${session.code} (${formatDateRange(session.start, session.end)}) 内；不会应用到 reading week 或 final period。`;
-    }
-
-    function toggleTimeInputs() {
-      const allDay = document.getElementById("allDay").checked;
-      document.getElementById("timeRow").style.display = allDay ? "none" : "grid";
-    }
-
-    function setMode(mode) {
-      currentMode = mode;
-
-      document.getElementById("pasteModeButton").classList.toggle("active", mode === "paste");
-      document.getElementById("selectModeButton").classList.toggle("active", mode === "select");
-      document.getElementById("recurringModeButton").classList.toggle("active", mode === "recurring");
-      document.getElementById("pastePanel").classList.toggle("active", mode === "paste");
-      document.getElementById("selectPanel").classList.toggle("active", mode === "select");
-    }
-
-    function getDateOrder() {
-      return [
-        document.getElementById("part1").value,
-        document.getElementById("part2").value,
-        document.getElementById("part3").value
-      ];
-      document.getElementById("recurringPanel").classList.toggle("active", mode === "recurring");
-    }
-
-    function validateDateOrder() {
-      const order = getDateOrder();
-      const unique = new Set(order);
-      return unique.size === 3 && unique.has("year") && unique.has("month") && unique.has("day");
-    function pushDateIfValid(matches, year, month, day) {
-      if (isValidDateParts(year, month, day)) {
-        matches.push(makeDate(year, month, day));
-      }
-    }
-
-    function parseDateToken(token, type) {
-      const cleaned = token.trim().toLowerCase();
-    function parsePastedDates(rawText) {
-      const matches = [];
-      const text = rawText.replace(/[，、]/g, ",");
-
-      if (type === "month" && monthMap[cleaned]) {
-        return monthMap[cleaned];
-      for (const match of text.matchAll(/(20\d{2}|19\d{2})(\d{2})(\d{2})(?=(?:19|20)\d{2}|\D|$)/g)) {
-        pushDateIfValid(matches, Number(match[1]), Number(match[2]), Number(match[3]));
-      }
-
-      if (/^\d+$/.test(cleaned)) {
-        return Number(cleaned);
-      for (const match of text.matchAll(/(20\d{2}|19\d{2})\s*[-\/. _]\s*(\d{1,2})\s*[-\/. _]\s*(\d{1,2})(?=(?:19|20)\d{2}|\D|$)/g)) {
-        pushDateIfValid(matches, Number(match[1]), Number(match[2]), Number(match[3]));
-      }
-
-      return null;
-    }
-
-    function splitDateLine(line) {
-      return line
-        .trim()
-        .replace(/,/g, " ")
-        .split(/[^a-zA-Z0-9]+/)
-        .map(part => part.trim())
-        .filter(Boolean);
-    }
-
-    function parseFlexibleDate(line) {
-      const parts = splitDateLine(line);
-      const order = getDateOrder();
-
-      if (parts.length !== 3) return null;
-      if (!validateDateOrder()) return null;
-
-      const parsed = {};
-
-      for (let i = 0; i < 3; i++) {
-        const type = order[i];
-        parsed[type] = parseDateToken(parts[i], type);
-      for (const match of text.matchAll(/\b([A-Za-z]{3,9})\s+(\d{1,2})(?:st|nd|rd|th)?[,]?\s+(20\d{2}|19\d{2})\b/g)) {
-        const month = monthMap[match[1].toLowerCase()];
-        pushDateIfValid(matches, Number(match[3]), month, Number(match[2]));
-      }
-
-      if (!isValidDateParts(parsed.year, parsed.month, parsed.day)) {
-        return null;
-      for (const match of text.matchAll(/\b(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,9})[,]?\s+(20\d{2}|19\d{2})\b/g)) {
-        const month = monthMap[match[2].toLowerCase()];
-        pushDateIfValid(matches, Number(match[3]), month, Number(match[1]));
-      }
-
-      return makeDate(parsed.year, parsed.month, parsed.day);
-      return [...new Set(matches)].sort();
-    }
-
-    function cleanDates(rawText) {
-      return rawText
-        .split(/[\n]+/)
-        .flatMap(line => line.split(/(?<=\d{4}|[a-zA-Z])\s*,\s*(?=\d|[a-zA-Z])/))
-        .map(item => item.trim())
-        .filter(Boolean)
-        .map(parseFlexibleDate)
-        .filter(Boolean);
-    }
-
-    function createMonthOptions(selectedMonth) {
-      let options = `<option value="any" ${selectedMonth === "any" ? "selected" : ""}>Any</option>`;
-
-      options += monthNames.map((name, index) => {
-        const value = index + 1;
-        const selected = value === selectedMonth ? "selected" : "";
-        return `<option value="${value}" ${selected}>${name}</option>`;
-      }).join("");
-
-      return options;
-    }
-
-    function getRuleKey(year, monthValue, weekday) {
-      return `${year}-${monthValue}-${weekday}`;
-    }
-
-    function getDatesForWeekday(year, monthValue, weekday) {
-    function getRecurringDates() {
-      const sessionKey = document.getElementById("courseSession").value;
-      const session = academicDates[sessionKey];
-      const selectedWeekdays = Array.from(document.querySelectorAll('input[name="weekday"]:checked')).map(input => Number(input.value));
-      const dates = [];
-      const months = monthValue === "any"
-        ? Array.from({ length: 12 }, (_, index) => index + 1)
-        : [Number(monthValue)];
-
-      months.forEach(month => {
-        for (let day = 1; day <= daysInMonth(year, month); day++) {
-          const date = new Date(year, month - 1, day);
-          if (date.getDay() === weekday) {
-            dates.push(makeDate(year, month, day));
-          }
-      const cursor = new Date(session.start + "T00:00:00");
-      const end = new Date(session.end + "T00:00:00");
-
-      while (cursor <= end) {
-        const dateStr = makeDate(cursor.getFullYear(), cursor.getMonth() + 1, cursor.getDate());
-        const inReadingWeek = isWithinRange(dateStr, academicDates.rw.start, academicDates.rw.end);
-        if (selectedWeekdays.includes(cursor.getDay()) && !inReadingWeek) {
-          dates.push(dateStr);
-        }
-      });
-        cursor.setDate(cursor.getDate() + 1);
-      }
-
-      return dates;
-    }
-
-    function recomputeSelectedDates() {
-      selectedDates.clear();
-
-      manualDates.forEach(date => {
-        selectedDates.add(date);
-      });
-
-      weekdayRules.forEach(rule => {
-        getDatesForWeekday(rule.year, rule.monthValue, rule.weekday).forEach(date => {
-          selectedDates.add(date);
-        });
-      });
-    }
-
-    function hasDirectRule(year, monthValue, weekday) {
-      return weekdayRules.has(getRuleKey(year, monthValue, weekday));
-    }
-
-    function hasInheritedAnyRule(year, monthValue, weekday) {
-      return monthValue !== "any" && weekdayRules.has(getRuleKey(year, "any", weekday));
-    }
-
-    function isWeekdayButtonActive(year, monthValue, weekday) {
-      return hasDirectRule(year, monthValue, weekday) || hasInheritedAnyRule(year, monthValue, weekday);
-    }
-
-    function toggleWeekdayRule(year, monthValue, weekday) {
-      const directKey = getRuleKey(year, monthValue, weekday);
-      const inheritedAnyKey = getRuleKey(year, "any", weekday);
-
-      if (weekdayRules.has(directKey)) {
-        weekdayRules.delete(directKey);
-      } else if (monthValue !== "any" && weekdayRules.has(inheritedAnyKey)) {
-        weekdayRules.delete(inheritedAnyKey);
-      } else {
-        weekdayRules.set(directKey, { year, monthValue, weekday });
-    function getDatesByCurrentMode() {
-      if (currentMode === "paste") {
-        return parsePastedDates(document.getElementById("datesText").value);
-      }
-
-      recomputeSelectedDates();
-      renderAllCalendars();
-    }
-
-    function toggleSingleDate(dateStr) {
-      if (manualDates.has(dateStr)) {
-        manualDates.delete(dateStr);
-      } else if (selectedDates.has(dateStr)) {
-        selectedDates.delete(dateStr);
-        manualDates.delete(dateStr);
-      } else {
-        manualDates.add(dateStr);
-      return getRecurringDates();
-    }
-
-    function buildDescription(note, weight, location, link) {
-      const lines = [];
-      if (weight) lines.push(`Grade weight: ${weight}`);
-      if (note) lines.push(note);
-      if (location) lines.push(`Room / location: ${location}`);
-      if (link) lines.push(`Link: ${link}`);
-      return lines.join("\n");
-    }
-
-    function getCurrentFormData() {
-      return {
-        courseName: document.getElementById("courseName").value.trim(),
-        courseCode: document.getElementById("courseCode").value.trim().toUpperCase(),
-        session: document.getElementById("courseSession").value,
-        assessmentName: document.getElementById("assessmentName").value.trim(),
-        weight: document.getElementById("weight").value.trim(),
-        note: document.getElementById("note").value.trim(),
-        location: document.getElementById("location").value.trim(),
-        link: document.getElementById("link").value.trim(),
-        startTime: document.getElementById("startTime").value,
-        endTime: document.getElementById("endTime").value,
-        allDay: document.getElementById("allDay").checked,
-        dates: getDatesByCurrentMode()
-      };
-    }
-
-    function validateAssessment(data) {
-      if (!data.courseCode || !data.courseName) {
-        alert("请填写课程名称和课程代码。");
-        return false;
-      }
-
-      recomputeSelectedDates();
-      renderAllCalendars();
-    }
-
-    function addMonthBlock(defaultYear = 2026, defaultMonth = "any") {
-      monthBlockId++;
-      const id = monthBlockId;
-      const container = document.getElementById("monthContainer");
-      const block = document.createElement("div");
-
-      block.className = "month-block";
-      block.dataset.blockId = id;
-      block.innerHTML = `
-        <div class="month-header">
-          <div>
-            <label for="year-${id}">年份</label>
-            <input id="year-${id}" type="number" value="${defaultYear}" onchange="renderAllCalendars()" />
-          </div>
-          <div>
-            <label for="month-${id}">月份</label>
-            <select id="month-${id}" onchange="renderAllCalendars()">
-              ${createMonthOptions(defaultMonth)}
-            </select>
-          </div>
-          <button type="button" class="small-button remove-button" onclick="removeMonthBlock(${id})">删除</button>
-        </div>
-        <div class="calendar-grid" id="calendar-${id}"></div>
-      `;
-
-      container.appendChild(block);
-      recomputeSelectedDates();
-      renderAllCalendars();
-    }
-
-    function removeMonthBlock(id) {
-      const block = document.querySelector(`[data-block-id="${id}"]`);
-      if (block) {
-        block.remove();
-      if (!data.assessmentName) {
-        alert("请填写项目名称。");
-        return false;
-      }
-    }
-
-    function renderCalendar(id) {
-      const year = Number(document.getElementById(`year-${id}`).value);
-      const monthValue = document.getElementById(`month-${id}`).value;
-      const grid = document.getElementById(`calendar-${id}`);
-
-      grid.innerHTML = "";
-
-      weekdayNames.forEach((name, weekday) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "weekday-button";
-        button.textContent = name;
-        button.classList.toggle("active", isWeekdayButtonActive(year, monthValue, weekday));
-        button.onclick = function () {
-          toggleWeekdayRule(year, monthValue, weekday);
-        };
-        grid.appendChild(button);
-      });
-
-      if (monthValue === "any") {
-        return;
-      if (!data.weight) {
-        alert("请填写分数占比，例如 5%。");
-        return false;
-      }
-
-      const month = Number(monthValue);
-      const firstWeekday = new Date(year, month - 1, 1).getDay();
-      const totalDays = daysInMonth(year, month);
-
-      for (let i = 0; i < firstWeekday; i++) {
-        const blank = document.createElement("div");
-        blank.className = "blank-day";
-        grid.appendChild(blank);
-      if (!data.allDay && (!data.startTime || !data.endTime)) {
-        alert("请填写开始时间和结束时间，或勾选全天事件。");
-        return false;
-      }
-
-      for (let day = 1; day <= totalDays; day++) {
-        const dateStr = makeDate(year, month, day);
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "day-button";
-        button.textContent = day;
-        button.classList.toggle("selected", selectedDates.has(dateStr));
-        button.onclick = function () {
-          toggleSingleDate(dateStr);
-        };
-        grid.appendChild(button);
-      if (data.dates.length === 0) {
-        alert(currentMode === "paste" ? "没有识别到有效日期，请检查粘贴内容。" : "请选择至少一个星期几。");
-        return false;
-      }
-    }
-
-    function renderAllCalendars() {
-      document.querySelectorAll(".month-block").forEach(block => {
-        renderCalendar(Number(block.dataset.blockId));
-      });
-    }
-
-    function getSelectedDates() {
-      recomputeSelectedDates();
-      return Array.from(selectedDates).sort();
-    }
-
-    function getDatesByCurrentMode() {
-      if (currentMode === "paste") {
-        return cleanDates(document.getElementById("datesText").value);
-      if (courseCalendar.courseCode && courseCalendar.courseCode !== data.courseCode) {
-        alert(`当前课程日历是 ${courseCalendar.courseCode}，不能混合加入 ${data.courseCode}。请先下载或清空当前课程日历。`);
-        return false;
-      }
-
-      if (currentMode === "select") {
-        return getSelectedDates();
-      }
-      return true;
-    }
-
-    function addCurrentAssessment() {
-      const data = getCurrentFormData();
-      if (!validateAssessment(data)) return;
-
-      courseCalendar.courseCode = data.courseCode;
-      courseCalendar.courseName = data.courseName;
-      courseCalendar.session = data.session;
-
-      data.dates.forEach(date => {
-        courseCalendar.events.push({
-          date,
-          courseCode: data.courseCode,
-          courseName: data.courseName,
-          session: data.session,
-          assessmentName: data.assessmentName,
-          weight: data.weight,
-          note: data.note,
-          location: data.location,
-          link: data.link,
-          allDay: data.allDay,
-          startTime: data.startTime,
-          endTime: data.endTime,
-          description: buildDescription(data.note, data.weight, data.location, data.link)
-        });
-      });
-
-      return [];
-      renderCalendarSummary();
-      document.getElementById("assessmentName").value = "";
-      document.getElementById("weight").value = "";
-      document.getElementById("note").value = "";
-      document.getElementById("link").value = "";
-      alert(`已添加 ${data.dates.length} 个事件到 ${data.courseCode} 课程日历。`);
-    }
-
-    function generateICS() {
-      const projectName = document.getElementById("projectName").value.trim();
-      const note = document.getElementById("note").value.trim();
-      const startTime = document.getElementById("startTime").value;
-      const endTime = document.getElementById("endTime").value;
-      const location = document.getElementById("location").value.trim();
-      const allDay = document.getElementById("allDay").checked;
-    function renderCalendarSummary() {
-      const summary = document.getElementById("calendarSummary");
-
-      if (currentMode === "paste" && !validateDateOrder()) {
-        alert("日期顺序必须刚好包含 Year、Month、Day，不能重复。");
-      if (courseCalendar.events.length === 0) {
-        summary.className = "empty-state";
-        summary.textContent = "还没有添加任何项目。";
-        return;
-      }
-
-      const dates = [...new Set(getDatesByCurrentMode())].sort();
-
-      if (!projectName || !note) {
-        alert("请填写项目名称和备注。");
-        return;
-      }
-
-      if (dates.length === 0) {
-        alert("当前模式下没有有效日期。请检查日期顺序和日期内容。");
-        return;
-      }
-      const grouped = courseCalendar.events.reduce((acc, event) => {
-        const key = `${event.assessmentName} (${event.weight})`;
-        acc[key] = acc[key] || [];
-        acc[key].push(event.date);
-        return acc;
-      }, {});
-
-      summary.className = "";
-      summary.innerHTML = `
-        <strong>${courseCalendar.courseCode} · ${courseCalendar.courseName}</strong>
-        <p class="hint">共 ${courseCalendar.events.length} 个事件。继续添加下一个项目，或点击完成下载整个课程日历。</p>
-        <ul>
-          ${Object.entries(grouped).map(([name, dates]) => `<li>${name}: ${dates.sort().join(", ")}</li>`).join("")}
-        </ul>
-      `;
-    }
-
-      if (!allDay && (!startTime || !endTime)) {
-        alert("请填写开始时间和结束时间，或勾选全天事件。");
-        return;
-      }
-    function clearCourseCalendar() {
-      courseCalendar = { courseCode: "", courseName: "", session: "", events: [] };
-      renderCalendarSummary();
-    }
-
-    function buildICS() {
-      const timestamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-
-      let ics = "BEGIN:VCALENDAR\r\n";
-      ics += "VERSION:2.0\r\n";
-      ics += "PRODID:-//Simple ICS Generator//EN\r\n";
-      ics += "PRODID:-//UTSC Course ICS Generator//EN\r\n";
-      ics += "CALSCALE:GREGORIAN\r\n";
-      ics += `X-WR-CALNAME:${escapeICS(courseCalendar.courseCode + " Course Calendar")}\r\n`;
-
-      courseCalendar.events
-        .slice()
-        .sort((a, b) => a.date.localeCompare(b.date) || a.assessmentName.localeCompare(b.assessmentName))
-        .forEach(event => {
-          const title = `${event.courseCode} - ${event.assessmentName}`;
-          ics += "BEGIN:VEVENT\r\n";
-          ics += `UID:${generateUID()}\r\n`;
-          ics += `DTSTAMP:${timestamp}\r\n`;
-
-          if (event.allDay) {
-            ics += `DTSTART;VALUE=DATE:${formatICSDate(event.date)}\r\n`;
-            ics += `DTEND;VALUE=DATE:${formatICSDate(getNextDate(event.date))}\r\n`;
-          } else {
-            ics += `DTSTART:${formatICSDateTime(event.date, event.startTime)}\r\n`;
-            ics += `DTEND:${formatICSDateTime(event.date, event.endTime)}\r\n`;
-          }
-
-      dates.forEach(date => {
-        const title = `${projectName} - ${note}`;
-
-        ics += "BEGIN:VEVENT\r\n";
-        ics += `UID:${generateUID()}\r\n`;
-        ics += `DTSTAMP:${timestamp}\r\n`;
-
-        if (allDay) {
-          ics += `DTSTART;VALUE=DATE:${formatDate(date)}\r\n`;
-          ics += `DTEND;VALUE=DATE:${formatDate(getNextDate(date))}\r\n`;
-        } else {
-          ics += `DTSTART:${formatDateTime(date, startTime)}\r\n`;
-          ics += `DTEND:${formatDateTime(date, endTime)}\r\n`;
-        }
-
-        ics += `SUMMARY:${escapeICS(title)}\r\n`;
-        ics += `DESCRIPTION:${escapeICS(note)}\r\n`;
-
-        if (location) {
-          ics += `LOCATION:${escapeICS(location)}\r\n`;
-        }
-
-        ics += "END:VEVENT\r\n";
-      });
-          ics += `SUMMARY:${escapeICS(title)}\r\n`;
-          ics += `DESCRIPTION:${escapeICS(event.description)}\r\n`;
-          if (event.location) ics += `LOCATION:${escapeICS(event.location)}\r\n`;
-          if (event.link) ics += `URL:${escapeICS(event.link)}\r\n`;
-          ics += "END:VEVENT\r\n";
-        });
-
-      ics += "END:VCALENDAR\r\n";
-      return ics;
-    }
-
-    function downloadCourseCalendar() {
-      if (courseCalendar.events.length === 0) {
-        alert("请先至少添加一个项目到课程日历。 ");
-        return;
-      }
-
-      const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
-      const blob = new Blob([buildICS()], { type: "text/calendar;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${projectName}_${note}.ics`.replace(/\s+/g, "_");
-      a.download = `${courseCalendar.courseCode}_course_calendar.ics`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    addMonthBlock(2026, "any");
-    renderAcademicDates();
-    renderWeekdayPicker();
-    syncSessionHelp();
-    toggleTimeInputs();
-    renderCalendarSummary();
-  </script>
+  <div class="card">
+    <h2>1. 课程信息</h2>
+    <div class="row">
+      <div><label for="courseName">课程名称</label><input id="courseName" placeholder="例如：Special Topics in Translation" /></div>
+      <div><label for="courseCode">课程代码</label><input id="courseCode" placeholder="例如：ECTD66" /></div>
+    </div>
+    <label>课程学期</label>
+    <div class="session-buttons">
+      <button class="pill active" type="button" data-session="fss" onclick="setSession('fss')">First Sub-session · fss</button>
+      <button class="pill" type="button" data-session="sss" onclick="setSession('sss')">Second Sub-session · sss</button>
+      <button class="pill" type="button" data-session="fs" onclick="setSession('fs')">Full Session · fs</button>
+    </div>
+    <button class="btn secondary" type="button" onclick="lockCourse()">锁定 / 更新课程信息</button>
+    <div id="courseStatus" class="warning">当前还没有锁定课程。建议先填课程代码再添加项目。</div>
+  </div>
+
+  <div class="card">
+    <h2>2. 项目信息</h2>
+    <div class="row">
+      <div><label for="itemName">项目名称</label><input id="itemName" placeholder="例如：Project 1 / Quiz / Tutorial" /></div>
+      <div><label for="weight">分数占比</label><input id="weight" placeholder="例如：5%" /></div>
+    </div>
+    <div class="row">
+      <div><label for="room">教室 / 地点</label><input id="room" placeholder="例如：KW170 / Online" /></div>
+      <div><label for="link">链接</label><input id="link" placeholder="粘贴 Quercus / Zoom / submit link" /></div>
+    </div>
+    <label for="note">备注</label>
+    <textarea id="note" placeholder="任何想写进日历 DESCRIPTION 的内容"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>3. 事件时间</h2>
+    <div class="checkbox-row"><input id="allDay" type="checkbox" onchange="toggleTimeInputs()" /><label for="allDay">全天事件</label></div>
+    <div class="row" id="timeRow">
+      <div><label for="startTime">开始时间</label><input id="startTime" type="time" value="09:00" /></div>
+      <div><label for="endTime">结束时间</label><input id="endTime" type="time" value="10:00" /></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4. 事件日期</h2>
+    <div class="mode-tabs">
+      <button id="pasteModeButton" class="tab active" type="button" onclick="setMode('paste')">粘贴日期</button>
+      <button id="weeklyModeButton" class="tab" type="button" onclick="setMode('weekly')">按学期选择星期</button>
+    </div>
+
+    <div id="pastePanel" class="tab-panel active">
+      <div class="warning">支持不换行粘贴：例如 <b>2026-05-12,2026-05-14 2026/05/19 May 21 2026</b>。只要日期本身完整即可。</div>
+      <div class="three">
+        <div><label for="part1">第 1 位</label><select id="part1"><option value="year" selected>Year</option><option value="month">Month</option><option value="day">Day</option></select></div>
+        <div><label for="part2">第 2 位</label><select id="part2"><option value="year">Year</option><option value="month" selected>Month</option><option value="day">Day</option></select></div>
+        <div><label for="part3">第 3 位</label><select id="part3"><option value="year">Year</option><option value="month">Month</option><option value="day" selected>Day</option></select></div>
+      </div>
+      <label for="datesText">日期列表</label>
+      <textarea id="datesText" placeholder="2026-05-12, 2026-05-14, May 21 2026"></textarea>
+    </div>
+
+    <div id="weeklyPanel" class="tab-panel">
+      <div class="warning">这个模式只根据课程学期生成日期：fss / sss / fs。不会自动应用 rw 或 fp。</div>
+      <label>选择星期</label>
+      <div class="weekday-grid">
+        <button class="weekday" type="button" data-weekday="0" onclick="toggleWeekday(0)">Sunday</button>
+        <button class="weekday" type="button" data-weekday="1" onclick="toggleWeekday(1)">Monday</button>
+        <button class="weekday" type="button" data-weekday="2" onclick="toggleWeekday(2)">Tuesday</button>
+        <button class="weekday" type="button" data-weekday="3" onclick="toggleWeekday(3)">Wednesday</button>
+        <button class="weekday" type="button" data-weekday="4" onclick="toggleWeekday(4)">Thursday</button>
+        <button class="weekday" type="button" data-weekday="5" onclick="toggleWeekday(5)">Friday</button>
+        <button class="weekday" type="button" data-weekday="6" onclick="toggleWeekday(6)">Saturday</button>
+      </div>
+      <label for="excludeDates">排除日期，可选</label>
+      <input id="excludeDates" placeholder="例如：2026-05-15, 2026-05-18" />
+      <p class="muted" id="weeklyPreview">还没有选择星期。</p>
+    </div>
+
+    <button class="btn" type="button" onclick="addItemToCourse()">添加到课程日历</button>
+    <button class="btn secondary" type="button" onclick="clearItemForm()">清空当前项目输入</button>
+  </div>
+
+  <div class="card">
+    <h2>5. 当前课程日历</h2>
+    <div id="calendarSummary" class="muted">还没有添加任何事件。</div>
+    <div id="eventList" class="event-list"></div>
+    <button class="btn" type="button" onclick="downloadCourseICS()">完成课程日历并下载 ICS</button>
+    <button class="btn danger" type="button" onclick="resetCourseCalendar()">清空整个课程日历</button>
+  </div>
+</div>
+
+<script>
+const ACADEMIC_DATES={
+  fss:{label:"fss · First Sub-session",start:"2026-05-04",end:"2026-06-16"},
+  sss:{label:"sss · Second Sub-session",start:"2026-06-22",end:"2026-08-06"},
+  fs:{label:"fs · Full Session",start:"2026-05-04",end:"2026-08-06"},
+  rw:{label:"rw · Reading Week",start:"2026-06-17",end:"2026-06-20"},
+  fss_fp:{label:"fss_fp · FSS Final Period",start:"2026-06-17",end:"2026-06-20"},
+  sss_fp:{label:"sss_fp · SSS Final Period",start:"2026-08-10",end:"2026-08-22"},
+  fs_fp:{label:"fs_fp · FS Final Period",start:"2026-08-10",end:"2026-08-22"}
+};
+let selectedSession="fss", currentMode="paste", selectedWeekdays=new Set(), course=null, events=[];
+const monthMap={jan:1,january:1,feb:2,february:2,mar:3,march:3,apr:4,april:4,may:5,jun:6,june:6,jul:7,july:7,aug:8,august:8,sep:9,sept:9,september:9,oct:10,october:10,nov:11,november:11,dec:12,december:12};
+function pad(n){return String(n).padStart(2,"0")}
+function pretty(d){const x=new Date(d+"T00:00:00");return x.toLocaleDateString("en-CA",{month:"short",day:"numeric",year:"numeric"})}
+function renderAcademicDates(){document.getElementById("academicDates").innerHTML=Object.values(ACADEMIC_DATES).map(d=>`<div class="date-chip"><b>${d.label}</b>${pretty(d.start)} – ${pretty(d.end)}</div>`).join("")}
+function setSession(s){selectedSession=s;document.querySelectorAll(".pill").forEach(b=>b.classList.toggle("active",b.dataset.session===s));updateWeeklyPreview()}
+function lockCourse(){const code=document.getElementById("courseCode").value.trim().toUpperCase();const name=document.getElementById("courseName").value.trim();if(!code){alert("请先填写课程代码。不同课程不能混合，所以课程代码必须有。");return}if(course&&course.code!==code&&events.length>0){alert(`当前已经有 ${course.code} 的事件。请先下载或清空后再换课程代码。`);return}course={code,name,session:selectedSession};document.getElementById("courseCode").value=code;document.getElementById("courseStatus").innerHTML=`已锁定：<b>${code}</b>${name?" · "+name:""} · ${ACADEMIC_DATES[selectedSession].label}`;renderSummary()}
+function setMode(m){currentMode=m;document.getElementById("pasteModeButton").classList.toggle("active",m==="paste");document.getElementById("weeklyModeButton").classList.toggle("active",m==="weekly");document.getElementById("pastePanel").classList.toggle("active",m==="paste");document.getElementById("weeklyPanel").classList.toggle("active",m==="weekly")}
+function toggleTimeInputs(){document.getElementById("timeRow").style.display=document.getElementById("allDay").checked?"none":"grid"}
+function toggleWeekday(w){selectedWeekdays.has(w)?selectedWeekdays.delete(w):selectedWeekdays.add(w);document.querySelectorAll(".weekday").forEach(b=>b.classList.toggle("active",selectedWeekdays.has(Number(b.dataset.weekday))));updateWeeklyPreview()}
+function getDateOrder(){return [part1.value,part2.value,part3.value]}
+function validOrder(){const s=new Set(getDateOrder());return s.size===3&&s.has("year")&&s.has("month")&&s.has("day")}
+function daysInMonth(y,m){return new Date(y,m,0).getDate()}
+function validDate(y,m,d){return Number.isInteger(y)&&Number.isInteger(m)&&Number.isInteger(d)&&y>=1900&&y<=2100&&m>=1&&m<=12&&d>=1&&d<=daysInMonth(y,m)}
+function normalizeDate(y,m,d){return `${y}-${pad(m)}-${pad(d)}`}
+function parseParts(parts){if(parts.length!==3||!validOrder())return null;const order=getDateOrder();let obj={};for(let i=0;i<3;i++){const type=order[i], raw=parts[i].toLowerCase();obj[type]=(type==="month"&&monthMap[raw])?monthMap[raw]:(/^\d+$/.test(raw)?Number(raw):null)}return validDate(obj.year,obj.month,obj.day)?normalizeDate(obj.year,obj.month,obj.day):null}
+function extractDates(text){const results=[];const patterns=[/\b(\d{4})[-\/\.](\d{1,2})[-\/\.](\d{1,2})\b/g,/\b(\d{1,2})[-\/\.](\d{1,2})[-\/\.](\d{4})\b/g,/\b([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})\b/g,/\b(\d{1,2})\s+([A-Za-z]+),?\s+(\d{4})\b/g];let m;while((m=patterns[0].exec(text)))if(validDate(+m[1],+m[2],+m[3]))results.push(normalizeDate(+m[1],+m[2],+m[3]));while((m=patterns[1].exec(text)))results.push(parseParts([m[1],m[2],m[3]]));while((m=patterns[2].exec(text)))results.push(parseParts([m[1],m[2],m[3]]));while((m=patterns[3].exec(text)))results.push(parseParts([m[1],m[2],m[3]]));return [...new Set(results.filter(Boolean))].sort()}
+function datesBetween(start,end){let out=[],d=new Date(start+"T00:00:00"),last=new Date(end+"T00:00:00");while(d<=last){out.push(`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`);d.setDate(d.getDate()+1)}return out}
+function getWeeklyDates(){const range=ACADEMIC_DATES[selectedSession];const exclude=new Set(extractDates(document.getElementById("excludeDates").value));return datesBetween(range.start,range.end).filter(date=>selectedWeekdays.has(new Date(date+"T00:00:00").getDay())&&!exclude.has(date))}
+function updateWeeklyPreview(){const dates=getWeeklyDates();document.getElementById("weeklyPreview").textContent=dates.length?`预览：${dates.length} 个日期 · ${dates.slice(0,8).join(", ")}${dates.length>8?" ...":""}`:"还没有选择星期。"}
+function getDates(){return currentMode==="paste"?extractDates(document.getElementById("datesText").value):getWeeklyDates()}
+function nextDate(d){const x=new Date(d+"T00:00:00");x.setDate(x.getDate()+1);return `${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}`}
+function fmtDate(d){return d.replaceAll("-","")}
+function fmtDateTime(d,t){return fmtDate(d)+"T"+t.replace(":","")+"00"}
+function esc(s){return String(s||"").replace(/\\/g,"\\\\").replace(/,/g,"\\,").replace(/;/g,"\\;").replace(/\n/g,"\\n")}
+function uid(){return crypto.randomUUID?crypto.randomUUID()+"@utsc-course-calendar":Math.random().toString(36).slice(2)+"@utsc-course-calendar"}
+function buildDescription(e){return [`Course: ${course.code}${course.name?" - "+course.name:""}`,`Item: ${e.itemName}`,`Weight: ${e.weight||"N/A"}`,e.note?`Note: ${e.note}`:"",e.link?`Link: ${e.link}`:""].filter(Boolean).join("\n")}
+function addItemToCourse(){if(!course)lockCourse();if(!course)return;const itemName=document.getElementById("itemName").value.trim();const dates=getDates();const allDay=document.getElementById("allDay").checked;const startTime=document.getElementById("startTime").value,endTime=document.getElementById("endTime").value;if(!itemName){alert("请填写项目名称。");return}if(dates.length===0){alert("没有识别到有效日期。请检查粘贴内容或星期选择。只支持完整日期。" );return}if(!allDay&&(!startTime||!endTime)){alert("请填写开始/结束时间，或勾选全天事件。" );return}const e={id:uid(),itemName,weight:document.getElementById("weight").value.trim(),room:document.getElementById("room").value.trim(),link:document.getElementById("link").value.trim(),note:document.getElementById("note").value.trim(),dates,allDay,startTime,endTime,mode:currentMode,session:selectedSession};events.push(e);renderSummary();clearItemForm(false)}
+function removeEvent(id){events=events.filter(e=>e.id!==id);renderSummary()}
+function renderSummary(){document.getElementById("calendarSummary").innerHTML=course?`课程：<b>${course.code}</b>${course.name?" · "+course.name:""} · 已添加 ${events.length} 个项目，共 ${events.reduce((a,e)=>a+e.dates.length,0)} 个事件。`:"还没有锁定课程。";document.getElementById("eventList").innerHTML=events.map(e=>`<div class="event-item"><b>${e.itemName}</b> · ${e.weight||"No weight"}<br><span class="muted">${e.dates.length} dates · ${e.dates[0]}${e.dates.length>1?" → "+e.dates[e.dates.length-1]:""} · ${e.allDay?"All day":e.startTime+"-"+e.endTime}</span><button class="btn inline danger" type="button" onclick="removeEvent('${e.id}')">删除</button></div>`).join("")}
+function clearItemForm(clearDates=true){["itemName","weight","room","link","note"].forEach(id=>document.getElementById(id).value="");if(clearDates)document.getElementById("datesText").value=""}
+function downloadCourseICS(){if(!course||events.length===0){alert("请先添加至少一个项目。" );return}const stamp=new Date().toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";let ics="BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//UTSC Course Calendar Generator//EN\r\nCALSCALE:GREGORIAN\r\n";events.forEach(e=>e.dates.forEach(date=>{const title=`${course.code} - ${e.itemName}${e.weight?" ("+e.weight+")":""}`;ics+="BEGIN:VEVENT\r\n";ics+=`UID:${uid()}\r\nDTSTAMP:${stamp}\r\n`;if(e.allDay){ics+=`DTSTART;VALUE=DATE:${fmtDate(date)}\r\nDTEND;VALUE=DATE:${fmtDate(nextDate(date))}\r\n`}else{ics+=`DTSTART:${fmtDateTime(date,e.startTime)}\r\nDTEND:${fmtDateTime(date,e.endTime)}\r\n`}ics+=`SUMMARY:${esc(title)}\r\nDESCRIPTION:${esc(buildDescription(e))}\r\n`;if(e.room)ics+=`LOCATION:${esc(e.room)}\r\n`;ics+="END:VEVENT\r\n"}));ics+="END:VCALENDAR\r\n";const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`${course.code}_Summer_2026_Course_Calendar.ics`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
+function resetCourseCalendar(){if(confirm("确定清空当前课程日历？")){events=[];course=null;document.getElementById("courseStatus").textContent="当前还没有锁定课程。建议先填课程代码再添加项目。";renderSummary()}}
+renderAcademicDates();toggleTimeInputs();renderSummary();
+</script>
 </body>
 </html>
