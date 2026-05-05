@@ -18,7 +18,7 @@
     }
 
     .container {
-      max-width: 860px;
+      max-width: 900px;
       margin: auto;
       background: white;
       padding: 28px;
@@ -68,6 +68,13 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
+    }
+
+    .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
     }
 
     .checkbox-row {
@@ -120,6 +127,27 @@
 
     .mode-panel.active {
       display: block;
+    }
+
+    .format-box {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      background: #fafafa;
+    }
+
+    .format-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .format-note {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+      margin: 0;
     }
 
     .month-block {
@@ -208,6 +236,27 @@
       font-size: 18px;
       font-weight: 700;
     }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 20px;
+      }
+
+      .row,
+      .three-col,
+      .mode-tabs {
+        grid-template-columns: 1fr;
+      }
+
+      .month-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .days-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
   </style>
 </head>
 <body>
@@ -249,8 +298,41 @@
     </div>
 
     <div id="pastePanel" class="mode-panel active">
+      <div class="format-box">
+        <div class="format-title">粘贴日期顺序</div>
+        <p class="format-note">
+          请选择你粘贴日期的真实顺序。支持数字月份，也支持英文月份，例如 March、Mar、April、Apr。分隔符可以是 - / _ . 空格 或逗号。
+        </p>
+        <div class="three-col">
+          <div>
+            <label for="part1">第 1 位</label>
+            <select id="part1" onchange="validateDateOrder()">
+              <option value="year" selected>Year</option>
+              <option value="month">Month</option>
+              <option value="day">Day</option>
+            </select>
+          </div>
+          <div>
+            <label for="part2">第 2 位</label>
+            <select id="part2" onchange="validateDateOrder()">
+              <option value="year">Year</option>
+              <option value="month" selected>Month</option>
+              <option value="day">Day</option>
+            </select>
+          </div>
+          <div>
+            <label for="part3">第 3 位</label>
+            <select id="part3" onchange="validateDateOrder()">
+              <option value="year">Year</option>
+              <option value="month">Month</option>
+              <option value="day" selected>Day</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <label for="datesText">日期列表</label>
-      <textarea id="datesText" placeholder="每行一个日期，或用逗号分隔">2026-05-12,
+      <textarea id="datesText" placeholder="例如：2026-05-12 或 12 Mar 2026 或 March 12 2026">2026-05-12,
 2026-05-14,
 2026-05-19,
 2026-05-21,
@@ -273,10 +355,26 @@
   <script>
     let currentMode = "paste";
     let monthBlockId = 0;
+
     const monthNames = [
       "一月", "二月", "三月", "四月", "五月", "六月",
       "七月", "八月", "九月", "十月", "十一月", "十二月"
     ];
+
+    const monthMap = {
+      jan: 1, january: 1,
+      feb: 2, february: 2,
+      mar: 3, march: 3,
+      apr: 4, april: 4,
+      may: 5,
+      jun: 6, june: 6,
+      jul: 7, july: 7,
+      aug: 8, august: 8,
+      sep: 9, sept: 9, september: 9,
+      oct: 10, october: 10,
+      nov: 11, november: 11,
+      dec: 12, december: 12
+    };
 
     function pad(num) {
       return String(num).padStart(2, "0");
@@ -284,6 +382,14 @@
 
     function daysInMonth(year, month) {
       return new Date(year, month, 0).getDate();
+    }
+
+    function isValidDateParts(year, month, day) {
+      if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return false;
+      if (year < 1900 || year > 2100) return false;
+      if (month < 1 || month > 12) return false;
+      if (day < 1 || day > daysInMonth(year, month)) return false;
+      return true;
     }
 
     function formatDate(dateStr) {
@@ -330,12 +436,74 @@
       document.getElementById("selectPanel").classList.toggle("active", mode === "select");
     }
 
+    function getDateOrder() {
+      return [
+        document.getElementById("part1").value,
+        document.getElementById("part2").value,
+        document.getElementById("part3").value
+      ];
+    }
+
+    function validateDateOrder() {
+      const order = getDateOrder();
+      const unique = new Set(order);
+      return unique.size === 3 && unique.has("year") && unique.has("month") && unique.has("day");
+    }
+
+    function parseDateToken(token, type) {
+      const cleaned = token.trim().toLowerCase();
+
+      if (type === "month" && monthMap[cleaned]) {
+        return monthMap[cleaned];
+      }
+
+      if (/^\d+$/.test(cleaned)) {
+        return Number(cleaned);
+      }
+
+      return null;
+    }
+
+    function splitDateLine(line) {
+      return line
+        .trim()
+        .replace(/,/g, " ")
+        .split(/[^a-zA-Z0-9]+/)
+        .map(part => part.trim())
+        .filter(Boolean);
+    }
+
+    function parseFlexibleDate(line) {
+      const parts = splitDateLine(line);
+      const order = getDateOrder();
+
+      if (parts.length !== 3) return null;
+      if (!validateDateOrder()) return null;
+
+      const parsed = {};
+
+      for (let i = 0; i < 3; i++) {
+        const type = order[i];
+        parsed[type] = parseDateToken(parts[i], type);
+      }
+
+      const year = parsed.year;
+      const month = parsed.month;
+      const day = parsed.day;
+
+      if (!isValidDateParts(year, month, day)) return null;
+
+      return `${year}-${pad(month)}-${pad(day)}`;
+    }
+
     function cleanDates(rawText) {
       return rawText
-        .split(/[\n,]+/)
-        .map(d => d.trim())
+        .split(/[\n]+/)
+        .flatMap(line => line.split(/(?<=\d{4}|[a-zA-Z])\s*,\s*(?=\d|[a-zA-Z])/))
+        .map(item => item.trim())
         .filter(Boolean)
-        .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d));
+        .map(parseFlexibleDate)
+        .filter(Boolean);
     }
 
     function createMonthOptions(selectedMonth) {
@@ -428,6 +596,12 @@
       const endTime = document.getElementById("endTime").value;
       const location = document.getElementById("location").value.trim();
       const allDay = document.getElementById("allDay").checked;
+
+      if (currentMode === "paste" && !validateDateOrder()) {
+        alert("日期顺序必须刚好包含 Year、Month、Day，不能重复。");
+        return;
+      }
+
       const dates = [...new Set(getDatesByCurrentMode())].sort();
 
       if (!projectName || !note) {
@@ -436,7 +610,7 @@
       }
 
       if (dates.length === 0) {
-        alert("当前模式下没有有效日期。粘贴模式请使用 YYYY-MM-DD；选择模式请至少点选一个日期。");
+        alert("当前模式下没有有效日期。请检查日期顺序和日期内容。");
         return;
       }
 
